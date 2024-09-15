@@ -28,21 +28,8 @@ function initializeUI() {
     });
 
     document.getElementById('pendingOrdersBody').addEventListener('click', handleOrderActions);
-
-    // Load filters from session storage
-    loadFiltersFromSessionStorage();
-}
-
-function loadFiltersFromSessionStorage() {
-    const storedFilters = sessionStorage.getItem('currentFilters');
-    if (storedFilters) {
-        currentFilters = JSON.parse(storedFilters);
-        document.getElementById('filterButton').classList.toggle('active', currentFilters.length > 0);
-    }
-}
-
-function saveFiltersToSessionStorage(filters) {
-    sessionStorage.setItem('currentFilters', JSON.stringify(filters));
+      // Initially hide the Clear Filters button
+      updateClearFiltersButtonVisibility();
 }
 
 let currentFilters = [];
@@ -304,8 +291,8 @@ function applyFilters() {
     }
     
     document.getElementById('filterButton').classList.toggle('active', currentFilters.length > 0);
-    saveFiltersToSessionStorage(currentFilters);
     closeFilterModal(true);
+    updateClearFiltersButtonVisibility();
     loadPendingOrders(); // Reload orders with new filters
 }
 
@@ -315,7 +302,7 @@ function clearFilters() {
     const partyNameButtons = document.querySelectorAll('.party-name-btn');
     partyNameButtons.forEach(button => button.classList.remove('selected'));
     updateSelectionCount();
-    saveFiltersToSessionStorage(currentFilters);
+    updateClearFiltersButtonVisibility();
     loadPendingOrders(); // Reload orders without filters
 }
 
@@ -330,4 +317,13 @@ function showMessage(message) {
 
 function handleViewToggle() {
     loadPendingOrders();
+}
+// New function to update Clear Filters button visibility
+function updateClearFiltersButtonVisibility() {
+    const clearFiltersButton = document.getElementById('clearFiltersButton');
+    if (currentFilters.length > 0) {
+        clearFiltersButton.style.display = 'inline-block';
+    } else {
+        clearFiltersButton.style.display = 'none';
+    }
 }
