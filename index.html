@@ -326,13 +326,13 @@
         <div class="modal4-content">
             <div class="modal4-header">
                 <h5>Filters</h5>
-                <span class="close4">CLOSE</span>
+                <span class="close4">&times;</span>
             </div>
             <div class="modal4-body">
                 <div class="modal4-sidebar">
                     <ul id="filterMenu">
                         <li data-filter="partyName" class="filter-item active">Party Name</li>
-                        <!-- Add more filter options here -->
+                        <li data-filter="date" class="filter-item">Date</li>
                     </ul>
                 </div>
                 <div class="modal4-main" id="filterContent">
@@ -340,9 +340,11 @@
                         <button id="selectAllBtn" class="btn btn-secondary">Select All</button>
                         <button id="deselectAllBtn" class="btn btn-secondary">Deselect All</button>
                     </div>
-                    <div id="partyNameList" class="party-name-list"></div>
+                    <div id="filterItemList" class="filter-item-list">
+                        <!-- Filter items will be dynamically inserted here -->
+                    </div>
                     <div class="modal4-footer">
-                        <span id="selectionCount">0 parties selected</span>
+                        <span id="selectionCount">0 items selected</span>
                         <button id="saveFilterBtn" class="btn btn-primary">Show Results</button>
                     </div>
                 </div>
