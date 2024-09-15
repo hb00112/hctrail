@@ -12,14 +12,16 @@ function initializeUI() {
     const saveFilterBtn = document.getElementById('saveFilterBtn');
     const clearFiltersButton = document.getElementById('clearFiltersButton');
     const viewToggle = document.getElementById('viewToggle');
+    const filterMenu = document.getElementById('filterMenu');
 
     filterButton.addEventListener('click', openFilterModal);
     closeBtn.addEventListener('click', () => closeFilterModal(false));
-    selectAllBtn.addEventListener('click', selectAllPartyNames);
-    deselectAllBtn.addEventListener('click', deselectAllPartyNames);
+    selectAllBtn.addEventListener('click', selectAllItems);
+    deselectAllBtn.addEventListener('click', deselectAllItems);
     saveFilterBtn.addEventListener('click', applyFilters);
     clearFiltersButton.addEventListener('click', clearFilters);
     viewToggle.addEventListener('change', handleViewToggle);
+    filterMenu.addEventListener('click', handleFilterMenuClick);
 
     window.addEventListener('click', function(event) {
         if (event.target == filterModal) {
@@ -28,11 +30,13 @@ function initializeUI() {
     });
 
     document.getElementById('pendingOrdersBody').addEventListener('click', handleOrderActions);
-      // Initially hide the Clear Filters button
-      updateClearFiltersButtonVisibility();
+    updateClearFiltersButtonVisibility();
 }
 
-let currentFilters = [];
+let currentFilters = {
+    partyName: [],
+    date: []
+};
 
 function loadPendingOrders() {
     const pendingOrdersBody = document.getElementById('pendingOrdersBody');
@@ -61,9 +65,13 @@ function loadPendingOrders() {
                 console.log('Total orders:', orders.length);
 
                 // Apply filters
-                orders = orders.filter(order => 
-                    currentFilters.length === 0 || currentFilters.includes(order.partyName)
-                );
+                orders = orders.filter(order => {
+                    const dateMatches = currentFilters.date.length === 0 || 
+                        currentFilters.date.includes(new Date(order.dateTime).toLocaleDateString());
+                    const partyMatches = currentFilters.partyName.length === 0 || 
+                        currentFilters.partyName.includes(order.partyName);
+                    return dateMatches && partyMatches;
+                });
                 console.log('Orders after filtering:', orders.length);
 
                 if (orders.length > 0) {
@@ -211,7 +219,7 @@ function handleOrderActions(e) {
 function openFilterModal() {
     const filterModal = document.getElementById('filterModal4');
     filterModal.style.display = 'block';
-    loadPartyNames();
+    loadFilterItems('partyName');
 }
 
 function closeFilterModal(applyFilter = false) {
@@ -219,91 +227,126 @@ function closeFilterModal(applyFilter = false) {
     filterModal.style.display = 'none';
     
     if (!applyFilter) {
-        // Reset the UI to match currentFilters
-        const partyNameButtons = document.querySelectorAll('.party-name-btn');
-        partyNameButtons.forEach(button => {
-            button.classList.toggle('selected', currentFilters.includes(button.textContent));
-        });
+        resetFilterUI();
     }
 }
 
-function loadPartyNames() {
-    const partyNameList = document.getElementById('partyNameList');
-    partyNameList.innerHTML = '';
+function loadFilterItems(filterType) {
+    const filterList = document.getElementById('filterItemList');
+    filterList.innerHTML = '';
 
     firebase.database().ref('orders').orderByChild('status').equalTo('Pending').once('value')
         .then(snapshot => {
             if (snapshot.exists()) {
-                const partyNames = new Set();
+                const items = new Set();
                 snapshot.forEach(childSnapshot => {
                     const order = childSnapshot.val();
-                    if (order.partyName) {
-                        partyNames.add(order.partyName);
+                    if (filterType === 'partyName' && order.partyName) {
+                        items.add(order.partyName);
+                    } else if (filterType === 'date' && order.dateTime) {
+                        items.add(new Date(order.dateTime).toLocaleDateString());
                     }
                 });
-                partyNames.forEach(partyName => {
+                items.forEach(item => {
                     const button = document.createElement('button');
-                    button.textContent = partyName;
-                    button.classList.add('party-name-btn');
-                    button.classList.toggle('selected', currentFilters.includes(partyName));
-                    button.addEventListener('click', togglePartyNameSelection);
-                    partyNameList.appendChild(button);
+                    button.textContent = item;
+                    button.classList.add('filter-item-btn');
+                    button.classList.toggle('selected', currentFilters[filterType].includes(item));
+                    button.addEventListener('click', () => toggleFilterItemSelection(item, filterType));
+                    filterList.appendChild(button);
                 });
             } else {
-                partyNameList.innerHTML = '<p>No party names found</p>';
+                filterList.innerHTML = '<p>No items found</p>';
             }
         })
         .catch(error => {
-            console.error("Error loading party names: ", error);
-            partyNameList.innerHTML = '<p>Error loading party names</p>';
+            console.error(`Error loading ${filterType} items:`, error);
+            filterList.innerHTML = `<p>Error loading ${filterType} items</p>`;
         });
 }
 
-function togglePartyNameSelection(event) {
-    event.target.classList.toggle('selected');
-    updateSelectionCount();
+function toggleFilterItemSelection(item, filterType) {
+    const index = currentFilters[filterType].indexOf(item);
+    if (index > -1) {
+        currentFilters[filterType].splice(index, 1);
+    } else {
+        currentFilters[filterType].push(item);
+    }
+    updateSelectionCount(filterType);
+    resetFilterUI();
 }
 
-function updateSelectionCount() {
-    const selectedParties = document.querySelectorAll('.party-name-btn.selected');
+function updateSelectionCount(filterType) {
     const selectionCountElement = document.getElementById('selectionCount');
-    selectionCountElement.textContent = `${selectedParties.length} parties selected`;
+    const count = currentFilters[filterType].length;
+    selectionCountElement.textContent = `${count} ${filterType === 'partyName' ? 'parties' : 'dates'} selected`;
 }
 
-function selectAllPartyNames() {
-    const partyNameButtons = document.querySelectorAll('.party-name-btn');
-    partyNameButtons.forEach(button => button.classList.add('selected'));
-    updateSelectionCount();
+function selectAllItems() {
+    const activeFilterType = document.querySelector('.filter-item.active').dataset.filter;
+    const filterButtons = document.querySelectorAll('.filter-item-btn');
+    filterButtons.forEach(button => {
+        button.classList.add('selected');
+        if (!currentFilters[activeFilterType].includes(button.textContent)) {
+            currentFilters[activeFilterType].push(button.textContent);
+        }
+    });
+    updateSelectionCount(activeFilterType);
 }
 
-function deselectAllPartyNames() {
-    const partyNameButtons = document.querySelectorAll('.party-name-btn');
-    partyNameButtons.forEach(button => button.classList.remove('selected'));
-    updateSelectionCount();
+function deselectAllItems() {
+    const activeFilterType = document.querySelector('.filter-item.active').dataset.filter;
+    const filterButtons = document.querySelectorAll('.filter-item-btn');
+    filterButtons.forEach(button => button.classList.remove('selected'));
+    currentFilters[activeFilterType] = [];
+    updateSelectionCount(activeFilterType);
 }
 
 function applyFilters() {
-    currentFilters = Array.from(document.querySelectorAll('.party-name-btn.selected')).map(btn => btn.textContent);
-    
-    if (currentFilters.length === 0) {
+    if (Object.values(currentFilters).every(arr => arr.length === 0)) {
         showMessage('No filter selected');
         return;
     }
     
-    document.getElementById('filterButton').classList.toggle('active', currentFilters.length > 0);
+    document.getElementById('filterButton').classList.add('active');
     closeFilterModal(true);
     updateClearFiltersButtonVisibility();
-    loadPendingOrders(); // Reload orders with new filters
+    loadPendingOrders();
 }
 
 function clearFilters() {
-    currentFilters = [];
+    currentFilters = {
+        partyName: [],
+        date: []
+    };
     document.getElementById('filterButton').classList.remove('active');
-    const partyNameButtons = document.querySelectorAll('.party-name-btn');
-    partyNameButtons.forEach(button => button.classList.remove('selected'));
-    updateSelectionCount();
+    resetFilterUI();
     updateClearFiltersButtonVisibility();
-    loadPendingOrders(); // Reload orders without filters
+    loadPendingOrders();
+}
+
+function resetFilterUI() {
+    const activeFilterType = document.querySelector('.filter-item.active').dataset.filter;
+    const filterButtons = document.querySelectorAll('.filter-item-btn');
+    filterButtons.forEach(button => {
+        button.classList.toggle('selected', currentFilters[activeFilterType].includes(button.textContent));
+    });
+    updateSelectionCount(activeFilterType);
+}
+
+function handleFilterMenuClick(event) {
+    if (event.target.classList.contains('filter-item')) {
+        const filterItems = document.querySelectorAll('.filter-item');
+        filterItems.forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+        loadFilterItems(event.target.dataset.filter);
+    }
+}
+
+function updateClearFiltersButtonVisibility() {
+    const clearFiltersButton = document.getElementById('clearFiltersButton');
+    const hasActiveFilters = Object.values(currentFilters).some(arr => arr.length > 0);
+    clearFiltersButton.style.display = hasActiveFilters ? 'inline-block' : 'none';
 }
 
 function showMessage(message) {
@@ -317,13 +360,4 @@ function showMessage(message) {
 
 function handleViewToggle() {
     loadPendingOrders();
-}
-// New function to update Clear Filters button visibility
-function updateClearFiltersButtonVisibility() {
-    const clearFiltersButton = document.getElementById('clearFiltersButton');
-    if (currentFilters.length > 0) {
-        clearFiltersButton.style.display = 'inline-block';
-    } else {
-        clearFiltersButton.style.display = 'none';
-    }
 }
