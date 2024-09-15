@@ -19,7 +19,7 @@
         <link rel="icon" href="https://s3.ezgif.com/tmp/ezgif-3-092ebae015.png" type="image/png">
         <meta name="theme-color" content="#4285f4">
     <!-- Other head elements -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="modal fade" id="usernameModal" tabindex="-1" aria-labelledby="usernameModalLabel" aria-hidden="true">
@@ -265,7 +265,7 @@
     </div>
     <div id="orders" class="section">
         <h4>Orders</h4>
-        <form id="orderForm"></form>
+        <form id="orderForm">
             <div class="mb-3">
                 <input type="text" class="form-control" id="partySearch" placeholder="Search or add party">
                 <div id="partyList" class="list-group mt-2" style="display: none;"></div>
@@ -282,9 +282,9 @@
         </div>
         <!-- The cart summary table will be inserted here dynamically -->
     </div>
+    
+    <!--***********************pending order -->
     <div class="container mt-2">
-        
-        <!-- *************************Pending Orders Section*************** -->
         <div id="pendingOrders" class="section">
             <h4>Pending Orders</h4>
             <div class="d-flex justify-content-center align-items-center mb-2">
@@ -297,9 +297,8 @@
                     <span class="ms-2">Detailed</span>
                 </div>
             </div>
-            <div class="actions-container">
-                <button class="filter-button">Filter</button>
-            </div>
+            <button id="filterButton" class="btn btn-success" style="width: 200px; height: 30px;">Filter</button>
+            <button id="clearFiltersButton" class="btn btn-secondary">Clear Filters</button>
             <table class="table table-sm">
                 <thead id="pendingOrdersHeadDetailed">
                     <tr>
@@ -315,14 +314,41 @@
                         <th>Date</th>
                         <th>Party Name</th>
                         <th>Total Qty</th>
-                        <th>&#8942;</th>
                     </tr>
                 </thead>
                 <tbody id="pendingOrdersBody"></tbody>
             </table>
         </div>
-    </body>
-
+    </div>
+    
+    <div id="filterModal4" class="modal4">
+        <div class="modal4-content">
+            <div class="modal4-header">
+                <h5>Filters</h5>
+                <span class="close4">CLOSE</span>
+            </div>
+            <div class="modal4-body">
+                <div class="modal4-sidebar">
+                    <ul id="filterMenu">
+                        <li data-filter="partyName" class="filter-item active">Party Name</li>
+                        <!-- Add more filter options here -->
+                    </ul>
+                </div>
+                <div class="modal4-main" id="filterContent">
+                    <div class="filter-actions">
+                        <button id="selectAllBtn" class="btn btn-secondary">Select All</button>
+                        <button id="deselectAllBtn" class="btn btn-secondary">Deselect All</button>
+                    </div>
+                    <div id="partyNameList" class="party-name-list"></div>
+                    <div class="modal4-footer">
+                        <span id="selectionCount">0 parties selected</span>
+                        <button id="saveFilterBtn" class="btn btn-primary">Show Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="noFilterSelectedMessage" class="message">No filter selected</div>
         <!-- **********************Billing Section**************************** -->
         <div id="billing" class="section">
             <h4>Billing</h4>
@@ -370,21 +396,21 @@
         </div>
     </div>
     <!-- Your JavaScript files -->
-    <script src="firebase-config.js"></script>
-    <script src="utils.js"></script>
-    <script src="auth.js"></script>
-    <script src="orders.js"></script>
-    <script src="pending.js"></script>
-    <script src="billing.js"></script>
-    <script src="sent.js"></script>
-    <script src="backup-details.js"></script>
-    <script src="backup-restore.js"></script>
-    <script src="xls-exports.js"></script>
-    <script src="deleted-orders.js"></script>
-    <script src="activity-logs.js"></script>
-    <script src="masters.js"></script>
-    <script src="user-management.js"></script>
-    <script src="main.js"></script>
-    <script src="animations.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/pending.js"></script>
+    <script src="js/billing.js"></script>
+    <script src="js/sent.js"></script>
+    <script src="js/backup-details.js"></script>
+    <script src="js/backup-restore.js"></script>
+    <script src="js/xls-exports.js"></script>
+    <script src="js/deleted-orders.js"></script>
+    <script src="js/activity-logs.js"></script>
+    <script src="js/masters.js"></script>
+    <script src="js/user-management.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/animations.js"></script>
 </body>
 </html>
