@@ -19,7 +19,7 @@
         <link rel="icon" href="https://s3.ezgif.com/tmp/ezgif-3-092ebae015.png" type="image/png">
         <meta name="theme-color" content="#4285f4">
     <!-- Other head elements -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="modal fade" id="usernameModal" tabindex="-1" aria-labelledby="usernameModalLabel" aria-hidden="true">
@@ -265,7 +265,7 @@
     </div>
     <div id="orders" class="section">
         <h4>Orders</h4>
-        <form id="orderForm">
+        <form id="orderForm"></form>
             <div class="mb-3">
                 <input type="text" class="form-control" id="partySearch" placeholder="Search or add party">
                 <div id="partyList" class="list-group mt-2" style="display: none;"></div>
@@ -282,9 +282,10 @@
         </div>
         <!-- The cart summary table will be inserted here dynamically -->
     </div>
-    
-    <!--***********************pending order -->
     <div class="container mt-2">
+        
+        <!-- *************************Pending Orders Section*************** -->
+      <div class="container mt-2">
         <div id="pendingOrders" class="section">
             <h4>Pending Orders</h4>
             <div class="d-flex justify-content-center align-items-center mb-2">
